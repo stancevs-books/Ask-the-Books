@@ -337,7 +337,7 @@ function renderLanding() {
     <div class="book-card" onclick="openBook('${b.id}')"
          style="border-color: ${b.colorBorder}20;">
       <div class="book-card-accent" style="background: ${b.color};"></div>
-      <p class="book-card-label" style="color:${b.color};">Oxford University Press</p>
+      <p class="book-card-label" style="color:${b.color};">${b.publisher}</p>
       <h2><em>${b.title}</em> ${b.subtitle}</h2>
       <p class="pub">${b.author} · ${b.publisher}</p>
       <p>${b.tagline}</p>
