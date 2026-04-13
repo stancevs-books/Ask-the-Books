@@ -1,0 +1,9 @@
+{
+  "name": "stantchev-books",
+  "version": "2.0.0",
+  "description": "Ask the Book agents for Stefan K. Stantchev's Oxford monographs",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ask the Books — Stefan K. Stantchev</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f7f6f3;
+      --bg3: #f0ede6;
+      --text: #1a1a18;
+      --text2: #5a5a56;
+      --text3: #8a8a84;
+      --border: rgba(0,0,0,0.10);
+      --border2: rgba(0,0,0,0.18);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1a; --bg2: #242422; --bg3: #2c2c2a;
+        --text: #f0ede6; --text2: #a0a09a; --text3: #6a6a64;
+        --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.18);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg3);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ---- LANDING ---- */
+    #landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 5rem;
+    }
+
+    .site-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+    .site-header .eyebrow {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text3); margin-bottom: 10px;
+    }
+    .site-header h1 {
+      font-size: 26px; font-weight: 400; color: var(--text);
+      line-height: 1.3; margin-bottom: 10px;
+    }
+    .site-header p {
+      font-size: 14px; color: var(--text2); line-height: 1.6;
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .book-card {
+      background: var(--bg);
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .book-card:hover { transform: translateY(-2px); }
+
+    .book-card-accent {
+      height: 4px;
+      border-radius: 2px;
+      margin-bottom: 1.25rem;
+    }
+    .book-card-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+    .book-card h2 {
+      font-size: 17px; font-weight: 500; line-height: 1.35;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .book-card h2 em { font-style: italic; }
+    .book-card .pub {
+      font-size: 12px; color: var(--text3); margin-bottom: 12px;
+    }
+    .book-card p {
+      font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 1rem;
+    }
+    .ask-btn {
+      display: inline-block; padding: 8px 18px;
+      font-size: 13px; font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: none; cursor: pointer;
+      color: #fff;
+      transition: opacity 0.15s;
+      font-family: inherit;
+    }
+    .ask-btn:hover { opacity: 0.85; }
+
+    /* ---- AGENT VIEW ---- */
+    #agent-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    .agent-topbar {
+      width: 100%; max-width: 700px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+    .back-btn {
+      background: none; border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 6px 12px;
+      font-size: 13px; color: var(--text2); cursor: pointer;
+      font-family: inherit; transition: background 0.12s;
+    }
+    .back-btn:hover { background: var(--bg2); }
+    .agent-topbar-title {
+      font-size: 14px; color: var(--text2);
+    }
+    .agent-topbar-title em { font-style: italic; }
+
+    .agent-header {
+      width: 100%; max-width: 700px;
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .agent-header h1 {
+      font-size: 17px; font-weight: 500; color: var(--text);
+      line-height: 1.35; margin-bottom: 3px;
+    }
+    .agent-header h1 em { font-style: italic; }
+    .agent-header .pub-line { font-size: 12px; color: var(--text3); }
+    .buy-links { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .buy-link {
+      display: inline-block; padding: 5px 12px; font-size: 12px; font-weight: 500;
+      border-radius: var(--radius-sm); text-decoration: none;
+      color: #fff; transition: opacity 0.15s;
+    }
+    .buy-link:hover { opacity: 0.85; }
+    .buy-link.secondary {
+      background: transparent !important;
+      border: 0.5px solid;
+    }
+
+    .chat-card {
+      width: 100%; max-width: 700px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      overflow: hidden;
+    }
+
+    .convo {
+      padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;
+      min-height: 280px; max-height: 500px; overflow-y: auto;
+    }
+
+    .msg { display: flex; gap: 10px; align-items: flex-start; }
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+    }
+    .avatar.user { background: var(--bg2); color: var(--text2); border: 0.5px solid var(--border); }
+
+    .bubble {
+      max-width: 87%; padding: 11px 15px; border-radius: var(--radius);
+      font-size: 14px; line-height: 1.75; color: var(--text);
+    }
+    .bubble.book {
+      background: var(--bg2); border: 0.5px solid var(--border);
+      border-top-left-radius: 4px;
+    }
+    .bubble.user {
+      border-top-right-radius: 4px;
+    }
+    .bubble p { margin-bottom: 8px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble .chapter-note {
+      margin-top: 12px; padding-top: 10px; border-top: 0.5px solid var(--border);
+      font-size: 13px; color: var(--text2);
+    }
+    .bubble .get-book {
+      display: inline-block; margin-top: 8px; padding: 5px 12px;
+      font-size: 12px; font-weight: 500; border-radius: var(--radius-sm);
+      text-decoration: none; color: #fff; transition: opacity 0.15s;
+    }
+    .bubble .get-book:hover { opacity: 0.85; }
+
+    .spinner {
+      display: inline-block; width: 13px; height: 13px;
+      border: 2px solid var(--border2); border-radius: 50%;
+      animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .suggestions-area {
+      padding: 0 1.5rem 1rem; border-bottom: 0.5px solid var(--border);
+    }
+    .suggestions-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text3); margin-bottom: 8px;
+    }
+    .suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sug {
+      padding: 6px 12px; font-size: 12px;
+      border: 0.5px solid var(--border2); border-radius: 20px;
+      cursor: pointer; background: var(--bg); color: var(--text2);
+      transition: all 0.12s; font-family: inherit; line-height: 1.4;
+    }
+    .sug:hover { background: var(--bg2); color: var(--text); }
+
+    .input-area {
+      padding: 1rem 1.5rem; display: flex; gap: 8px; align-items: flex-end;
+    }
+    textarea {
+      flex: 1; font-size: 14px; font-family: inherit; color: var(--text);
+      background: var(--bg2); border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 10px 14px; resize: none;
+      line-height: 1.5; min-height: 44px; max-height: 140px; overflow-y: auto;
+      transition: border-color 0.15s;
+    }
+    textarea:focus { outline: none; }
+    textarea::placeholder { color: var(--text3); }
+
+    .send-btn {
+      padding: 10px 20px; font-size: 14px; font-weight: 500;
+      color: #fff; border: none; border-radius: var(--radius);
+      cursor: pointer; height: 44px; white-space: nowrap;
+      transition: opacity 0.15s; font-family: inherit;
+    }
+    .send-btn:hover { opacity: 0.88; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .agent-footer {
+      width: 100%; max-width: 700px; margin-top: 0.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .agent-footer p { font-size: 11px; color: var(--text3); }
+    .reset-btn {
+      background: none; border: none; font-size: 11px; color: var(--text3);
+      cursor: pointer; font-family: inherit; padding: 4px 0;
+    }
+    .reset-btn:hover { color: var(--text2); }
+
+    @media (max-width: 600px) {
+      #landing { padding: 2rem 0.75rem 4rem; }
+      #agent-view { padding: 1rem 0.75rem 3rem; }
+      .site-header h1 { font-size: 20px; }
+      .convo { max-height: 380px; }
+      .bubble { max-width: 92%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+  <div class="site-header">
+    <p class="eyebrow">Stefan K. Stantchev · Arizona State University</p>
+    <h1>Ask the Books</h1>
+    <p>AI-powered discussion agents grounded in the argument of each book. Ask about themes, historical context, and scholarly debates — then follow the evidence into the full text.</p>
+  </div>
+
+  <div class="books-grid" id="books-grid">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- AGENT VIEW -->
+<div id="agent-view">
+  <div class="agent-topbar">
+    <button class="back-btn" onclick="showLanding()">← All books</button>
+    <span class="agent-topbar-title" id="topbar-title"></span>
+  </div>
+
+  <div class="agent-header" id="agent-header"></div>
+
+  <div class="chat-card">
+    <div class="convo" id="convo"></div>
+    <div class="suggestions-area">
+      <p class="suggestions-label">Try asking</p>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+    <div class="input-area">
+      <textarea id="q-input"
+        placeholder="Ask about the argument, a historical event, a chapter theme..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendQuestion()">Ask →</button>
+    </div>
+  </div>
+
+  <div class="agent-footer">
+    <p>Answers reflect the book's argument only · Powered by AI</p>
+    <button class="reset-btn" onclick="resetConvo()">Clear conversation</button>
+  </div>
+</div>
+
+<script>
+let books = {};
+let activeBook = null;
+let history = [];
+
+async function init() {
+  try {
+    const resp = await fetch("/api/books");
+    books = await resp.json();
+    renderLanding();
+  } catch (e) {
+    document.getElementById("books-grid").innerHTML =
+      '<p style="color:var(--text2);font-size:14px;">Could not load books. Please refresh.</p>';
+  }
+}
+
+function renderLanding() {
+  const grid = document.getElementById("books-grid");
+  grid.innerHTML = Object.values(books).map(b => `
+    <div class="book-card" onclick="openBook('${b.id}')"
+         style="border-color: ${b.colorBorder}20;">
+      <div class="book-card-accent" style="background: ${b.color};"></div>
+      <p class="book-card-label" style="color:${b.color};">Oxford University Press</p>
+      <h2><em>${b.title}</em> ${b.subtitle}</h2>
+      <p class="pub">${b.author} · ${b.publisher}</p>
+      <p>${b.tagline}</p>
+      <button class="ask-btn" style="background:${b.color};">Ask this book →</button>
+    </div>
+  `).join("");
+}
+
+function openBook(id) {
+  activeBook = books[id];
+  history = [];
+
+  // header
+  const linksHtml = Object.entries(activeBook.links).map(([key, url]) => {
+    const label = key === "amazon" ? "Amazon" : key === "oup" ? "Oxford UP" : "Oxford Academic";
+    const isFirst = key === "amazon";
+    return `<a class="buy-link ${isFirst ? "" : "secondary"}"
+      href="${url}" target="_blank" rel="noopener"
+      style="background:${isFirst ? activeBook.color : "transparent"};
+             color:${isFirst ? "#fff" : activeBook.color};
+             border-color:${activeBook.colorBorder};">${label} →</a>`;
+  }).join("");
+
+  document.getElementById("agent-header").innerHTML = `
+    <h1><em>${activeBook.title}</em> ${activeBook.subtitle}</h1>
+    <p class="pub-line">${activeBook.author} · ${activeBook.publisher}</p>
+    <div class="buy-links">${linksHtml}</div>
+  `;
+
+  document.getElementById("topbar-title").innerHTML =
+    `<em>${activeBook.title}</em>`;
+
+  // style dynamic elements
+  document.getElementById("send-btn").style.background = activeBook.color;
+  document.querySelector("textarea").style.borderColor = activeBook.colorBorder + "80";
+  document.querySelector("textarea").addEventListener("focus", function() {
+    this.style.borderColor = activeBook.color;
+  }, { once: false });
+
+  // avatar
+  document.querySelectorAll(".avatar.book").forEach(el => {
+    el.style.background = activeBook.colorLight;
+    el.style.color = activeBook.color;
+  });
+
+  // suggestions
+  const sugDiv = document.getElementById("suggestions");
+  sugDiv.innerHTML = activeBook.suggestions.map(s =>
+    `<button class="sug" onclick="ask(this.textContent)">${s}</button>`
+  ).join("");
+
+  // welcome message
+  resetConvo();
+
+  document.getElementById("landing").style.display = "none";
+  document.getElementById("agent-view").style.display = "flex";
+  window.scrollTo(0, 0);
+}
+
+function showLanding() {
+  document.getElementById("agent-view").style.display = "none";
+  document.getElementById("landing").style.display = "flex";
+  activeBook = null;
+  history = [];
+}
+
+function resetConvo() {
+  history = [];
+  document.getElementById("convo").innerHTML = `
+    <div class="msg">
+      <div class="avatar book" style="background:${activeBook.colorLight};color:${activeBook.color};">SK</div>
+      <div class="bubble book">
+        <p>Welcome! I can discuss the arguments, themes, and historical context of <em>${activeBook.title}</em>. Ask me anything, or try one of the suggested questions below.</p>
+        <p>For the full analysis and primary source evidence, the book is available via the links above.</p>
+      </div>
+    </div>`;
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+}
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
+}
+
+function ask(text) {
+  document.getElementById("q-input").value = text;
+  sendQuestion();
+}
+
+function escHtml(t) {
+  return String(t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function formatAnswer(text, bookColor, amazonUrl) {
+  const paragraphs = text.split(/\n+/).filter(p => p.trim());
+  let html = "";
+  let chapterNote = "";
+  for (const p of paragraphs) {
+    if (/^(Chapter \d|The full|For the full|Read more|Available from)/i.test(p.trim())) {
+      chapterNote = p.trim();
+    } else {
+      html += `<p>${escHtml(p)}</p>`;
+    }
+  }
+  if (chapterNote) {
+    html += `<div class="chapter-note">${escHtml(chapterNote)}
+      <br><a class="get-book" href="${amazonUrl}" target="_blank" rel="noopener"
+        style="background:${bookColor};">Get the book →</a></div>`;
+  }
+  return html || escHtml(text);
+}
+
+async function sendQuestion() {
+  const input = document.getElementById("q-input");
+  const q = input.value.trim();
+  if (!q || !activeBook) return;
+
+  const btn = document.getElementById("send-btn");
+  const convo = document.getElementById("convo");
+
+  input.value = "";
+  input.style.height = "auto";
+  btn.disabled = true;
+  btn.textContent = "...";
+
+  convo.innerHTML += `
+    <div class="msg user">
+      <div class="avatar user">You</div>
+      <div class="bubble user" style="background:${activeBook.colorLight};
+           border-color:${activeBook.colorBorder};color:${activeBook.colorDark};">
+        <p>${escHtml(q)}</p>
+      </div>
+    </div>`;
+
+  const loadId = "load-" + Date.now();
+  convo.innerHTML += `
+    <div class="msg" id="${loadId}">
+      <div class="avatar book" style="background:${activeBook.colorLight};color:${activeBook.color};">SK</div>
+      <div class="bubble book"><span class="spinner" style="border-top-color:${activeBook.color};"></span> Thinking...</div>
+    </div>`;
+  convo.scrollTop = convo.scrollHeight;
+
+  history.push({ role: "user", content: q });
+
+  try {
+    const resp = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookId: activeBook.id, messages: history }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Server error");
+
+    const answer = data.answer || "Sorry, I could not generate a response.";
+    history.push({ role: "assistant", content: answer });
+
+    const loadEl = document.getElementById(loadId);
+    if (loadEl) {
+      loadEl.querySelector(".bubble").innerHTML = formatAnswer(
+        answer, activeBook.color, activeBook.links.amazon
+      );
+    }
+  } catch (err) {
+    const loadEl = document.getElementById(loadId);
+    if (loadEl) loadEl.querySelector(".bubble").innerHTML =
+      `<p>Something went wrong: ${escHtml(err.message)}. Please try again.</p>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Ask →";
+  convo.scrollTop = convo.scrollHeight;
+}
+
+init();
+</script>
+</body>
+</html>
