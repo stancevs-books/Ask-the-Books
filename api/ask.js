@@ -36,23 +36,22 @@ export default async function handler(req, res) {
       }),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
-    return data;
+    return { status: response.status, data };
   };
 
   try {
-    let data;
-    try {
-      data = await makeRequest();
-    } catch (err) {
-      if (err.message.includes("overload")) {
-        await new Promise(r => setTimeout(r, 2000));
-        data = await makeRequest();
-      } else {
-        throw err;
-      }
+    let result = await makeRequest();
+
+    if (result.status === 529 || (result.data.error && result.data.error.type === "overloaded_error")) {
+      await new Promise(r => setTimeout(r, 3000));
+      result = await makeRequest();
     }
-    const text = data.content?.map((c) => c.text || "").join("") || "";
+
+    if (result.status !== 200) {
+      return res.status(result.status).json({ error: result.data.error?.message || "API error" });
+    }
+
+    const text = result.data.content?.map((c) => c.text || "").join("") || "";
     res.status(200).json({ answer: text });
   } catch (err) {
     res.status(500).json({ error: err.message });
