@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "API key not configured" });
 
-  const makeRequest = async () => {
+  const makeRequest = async (model) => {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model,
         max_tokens: 1000,
         system: book.system,
         messages,
@@ -46,16 +46,19 @@ export default async function handler(req, res) {
     (result.data?.error?.message || "").toLowerCase().includes("overload");
 
   try {
-    let result = await makeRequest();
+    // Try Sonnet first
+    let result = await makeRequest("claude-sonnet-4-20250514");
 
+    // If overloaded, wait and retry Sonnet
     if (isOverloaded(result)) {
-      await new Promise(r => setTimeout(r, 4000));
-      result = await makeRequest();
+      await new Promise(r => setTimeout(r, 3000));
+      result = await makeRequest("claude-sonnet-4-20250514");
     }
 
+    // If still overloaded, fall back to Haiku
     if (isOverloaded(result)) {
-      await new Promise(r => setTimeout(r, 6000));
-      result = await makeRequest();
+      await new Promise(r => setTimeout(r, 2000));
+      result = await makeRequest("claude-haiku-4-5-20251001");
     }
 
     if (result.status !== 200) {
