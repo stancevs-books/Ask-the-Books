@@ -144,7 +144,7 @@ RESPONSE RULES:
     title: "Economic Warfare and the Crusades",
     subtitle: "",
     author: "Edited by Stefan K. Stantchev",
-    publisher: "Brepols (forthcoming)",
+    publisher: "Presses Universitaires du Midi, 2025",
     series: "",
     isbn: "",
     color: "#993556",
@@ -152,7 +152,7 @@ RESPONSE RULES:
     colorBorder: "#F4C0D1",
     colorDark: "#4B1528",
     links: {
-      brepols: "https://www.brepols.net",
+      pum: "https://pum.univ-tlse2.fr/produit/economic-warfare-and-the-crusades/",
     },
     tagline: "A cross-disciplinary international volume on economic sanctions and crusading in later medieval Europe and the Mediterranean, ca. 1300–1600.",
     suggestions: [
