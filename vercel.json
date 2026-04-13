@@ -1,4 +1,12 @@
 {
+  "functions": {
+    "api/ask.js": {
+      "maxDuration": 30
+    },
+    "api/apibooks.js": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     { "source": "/api/ask", "destination": "/api/ask" },
     { "source": "/api/books", "destination": "/api/apibooks" },
