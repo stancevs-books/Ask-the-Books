@@ -39,11 +39,22 @@ export default async function handler(req, res) {
     return { status: response.status, data };
   };
 
+  const isOverloaded = (result) =>
+    result.status === 529 ||
+    result.status === 503 ||
+    result.data?.error?.type === "overloaded_error" ||
+    (result.data?.error?.message || "").toLowerCase().includes("overload");
+
   try {
     let result = await makeRequest();
 
-    if (result.status === 529 || (result.data.error && result.data.error.type === "overloaded_error")) {
-      await new Promise(r => setTimeout(r, 3000));
+    if (isOverloaded(result)) {
+      await new Promise(r => setTimeout(r, 4000));
+      result = await makeRequest();
+    }
+
+    if (isOverloaded(result)) {
+      await new Promise(r => setTimeout(r, 6000));
       result = await makeRequest();
     }
 
